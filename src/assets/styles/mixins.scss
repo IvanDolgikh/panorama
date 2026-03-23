@@ -1,0 +1,62 @@
+// Шрифты 
+
+// Spectral
+
+@mixin spectral-extralight {
+    font-family: "Spectral", serif;
+    font-weight: 200;
+    font-style: normal;
+}
+
+@mixin spectral-light {
+    font-family: "Spectral", serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+@mixin spectral-regular {
+    font-family: "Spectral", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@mixin spectral-medium {
+    font-family: "Spectral", serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+@mixin spectral-semibold {
+    font-family: "Spectral", serif;
+    font-weight: 600;
+    font-style: normal;
+}
+
+@mixin spectral-bold {
+    font-family: "Spectral", serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+// Lora
+
+@mixin lora-regular {
+    font-family: "Lora", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@mixin lora-medium {
+    font-family: "Lora", serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+}
+
+@mixin lora-semibold {
+    font-family: "Lora", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}

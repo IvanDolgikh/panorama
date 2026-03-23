@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "@components/*": [
+                "./src/components/*"
+            ],
+            "@views/*": [
+                "./src/views/*"
+            ],
+            "@styles/*": [
+                "./src/assets/styles/*"
+            ],
+            "@svg-images/*": [
+                "./src/assets/images/svg/*"
+            ],
+            "@other-images/*": [
+                "./src/assets/images/other/*"
+            ],
+            "@services/*": [
+                "./src/services/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}
