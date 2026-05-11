@@ -4,12 +4,20 @@ import router from './router'
 import '@styles/index.scss'
 import 'primeicons/primeicons.css'
 import 'swiper/swiper-bundle.css'
+import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config';
+import Tooltip from 'primevue/tooltip';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 import Aura from '@primeuix/themes/aura';
 import { createYmaps } from 'vue-yandex-maps';
 import { all as locales } from 'primelocale'
 
+const pinia = createPinia()
+
 const app = createApp(App);
+
+app.use(pinia)
 
 app.use(PrimeVue, {
     locale: locales.ru,
@@ -18,8 +26,14 @@ app.use(PrimeVue, {
     }
 });
 
+app.directive('tooltip', Tooltip);
+
+app.use(ConfirmationService);
+
+app.use(ToastService);
+
 app.use(createYmaps({
-    apikey: 'a1cafbc6-0f59-403f-82b1-442e744a62e3',
+    apikey: import.meta.env.VITE_YMAPS_KEY,
 }));
 
 app.use(router)

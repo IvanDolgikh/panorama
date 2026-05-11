@@ -174,7 +174,7 @@ const onFormSubmit = ({ valid }) => {
 >
 .reserve {
     &__container {
-        width: $vp-1200;
+        width: $vp-1440;
         max-width: 70%;
         margin: 0 auto 80px auto;
         padding: 0 50px;

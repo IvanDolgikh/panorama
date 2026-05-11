@@ -18,7 +18,7 @@ const _galleryHouse2 = Object.values(galleryHouse2)
 export const houses = [
     {
         id: 1,
-        slug: 'bakenschika',
+        slug: 'house-bakenschika',
         image: house1Image,
         imageAlt: 'Дом "Бакенщика"',
         houseTitle: 'Дом "Бакенщика"',
@@ -32,7 +32,7 @@ export const houses = [
 
     {
         id: 2,
-        slug: 'yamshika',
+        slug: 'house-yamshika',
         image: house2Image,
         imageAlt: 'Дом "Ямщика"',
         houseTitle: 'Дом "Ямщика"',

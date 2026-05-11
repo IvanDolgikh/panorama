@@ -1,0 +1,485 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// ИНПУТЫ
+
+.p-inputtext,
+.p-datepicker-input,
+.p-textarea {
+    background-color: transparent !important;
+    border: 1px solid $color-gray-lighter !important;
+    font-weight: 400 !important;
+    color: $color-base-text !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    width: 100%;
+}
+
+
+// ДАТАПИКЕР
+
+.p-datepicker {
+    .p-datepicker-input {
+        border-start-end-radius: 0 !important;
+        border-end-end-radius: 0 !important
+    }
+}
+
+
+.p-datepicker-panel {
+    background: $color-base-white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+
+    .p-datepicker-header {
+        background: $color-accent !important;
+        border-bottom: none;
+        border-radius: 10px;
+        padding: 2px;
+
+        .p-datepicker-select-month,
+        .p-datepicker-select-year {
+            color: $color-light-text;
+        }
+    }
+
+    .p-datepicker-weekdays,
+    .p-datepicker-month,
+    .p-datepicker-year {
+        color: $color-base-text !important;
+    }
+
+    .p-datepicker-calendar td span {
+        border-radius: 6px !important;
+
+        &.p-highlight {
+            background: $color-accent !important;
+            color: $color-light-text !important;
+        }
+    }
+
+    .p-datepicker-weekday,
+    .p-datepicker-day {
+        position: relative;
+        color: $color-base-text;
+        height: 32px;
+    }
+
+    .p-datepicker-day {
+        align-items: flex-start;
+
+        &:not(.p-disabled) {
+            .booking__date-price {
+                z-index: 100;
+                color: $color-gray-lighter;
+                font-size: 10px;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: fit-content;
+                margin: 0 auto;
+            }
+        }
+    }
+
+    .p-disabled {
+        .booking__date-price {
+            display: none;
+        }
+    }
+
+
+    .p-datepicker-day:not(.p-datepicker-day-selected):not(.p-disabled):hover {
+        color: $color-base-text !important;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .p-button-text.p-button-secondary:not(:disabled):hover {
+        background: transparent;
+        color: $color-base-white;
+    }
+
+    .p-datepicker-today>.p-datepicker-day {
+        background-color: transparent;
+        border: 1px solid $color-accent;
+        color: $color-base-text;
+    }
+
+    .p-datepicker-day-selected,
+    .p-datepicker-day-selected-range {
+        background-color: $color-accent !important;
+        color: $color-light-text !important;
+
+        .booking__date-price {
+            color: $color-light-text !important;
+        }
+    }
+}
+
+.p-datepicker-dropdown {
+    background-color: $color-accent !important;
+}
+
+@media (max-width: $vp-768) {
+    .p-datepicker-calendar-container {
+        flex-direction: column;
+    }
+
+    .p-datepicker-panel {
+        padding: 5px !important;
+    }
+
+    .p-datepicker-calendar {
+        padding: 0 !important;
+    }
+
+    .p-datepicker-calendar:nth-child(1) {
+        margin-bottom: 10px;
+    }
+
+    .p-datepicker-calendar:nth-child(2) {
+        border-inline-start: none !important;
+        border-top: 1px solid $color-accent;
+        padding-top: 10px !important;
+    }
+
+    // .p-datepicker-day-view {
+    //     font-size: 14px;
+    // }
+
+    .p-datepicker-day-cell {
+        padding: 4px !important;
+    }
+}
+
+// ТАБЫ
+
+.p-tabs {
+    margin-bottom: 16px;
+}
+
+.p-tab {
+    font-size: 16px;
+    color: $color-base-text !important;
+    border-color: $color-gray-lighter !important;
+    @include spectral-regular;
+    font-weight: 400 !important;
+}
+
+.p-tablist,
+.p-tabpanels {
+    background-color: $color-base-white !important;
+    padding: 10px 0 !important;
+}
+
+.p-tablist-active-bar {
+    background: $color-accent !important;
+    height: 2px !important
+}
+
+.p-tablist-tab-list {
+    border-color: $color-gray-lighter !important;
+}
+
+.p-tab-active {
+    background: transparent !important;
+}
+
+.p-dialog-title {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.p-inputtext,
+.p-datepicker-input,
+.p-password-input {
+    height: 40px !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-textarea:enabled:focus {
+    border-color: $color-accent;
+}
+
+// Чекбокс
+
+.my-checkbox {
+    cursor: pointer;
+
+    .p-checkbox-box {
+        width: 20px;
+        height: 20px;
+        background: transparent !important;
+        border: 1px solid $color-accent !important;
+        border-radius: 4px !important;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    &.p-checkbox-checked {
+        .p-checkbox-box {
+            background: $color-accent !important;
+            border-color: $color-accent !important;
+
+            .p-checkbox-icon {
+                color: $color-light-text !important;
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+// ТУЛТИП
+.p-tooltip-text {
+    @include spectral-regular;
+    font-size: 12px;
+    line-height: 1;
+    padding: 8px 10px !important;
+    background-color: rgba(36, 36, 36, 0.749) !important;
+}
+
+// КНОПКИ
+
+.p-button {
+    padding: 6px 14px !important;
+}
+
+.p-button-label {
+    @include spectral-light
+}
+
+.p-button-secondary {
+    background: $color-accent !important;
+    border: none !important;
+    color: $color-base-white !important;
+}
+
+.p-button-outlined {
+    color: $color-accent !important;
+    border-color: $color-accent !important;
+}
+
+.p-button-danger {
+    background: transparent !important;
+    border: 1px solid $color-danger !important;
+    color: $color-danger !important;
+}
+
+.p-fileupload-choose-button {
+    background: $color-accent !important;
+    border: none !important;
+    color: $color-base-white !important;
+    font-size: 14px !important;
+}
+
+// АККОРДИОН
+
+.p-accordionheader {
+    background: $color-accent !important;
+    color: #f3f3ee !important;
+    @include spectral-semibold;
+}
+
+.p-accordionpanel {
+    border-color: $color-gray-lighter !important;
+}
+
+.p-accordionpanel:not(.p-accordionpanel-active):not(.p-disabled)>.p-accordionheader:hover {
+    background-color: #727a4f !important;
+}
+
+.p-accordionheader-toggle-icon {
+    color: #f3f3ee !important;
+}
+
+.p-accordioncontent-content {
+    background: #f3f3ee !important;
+    padding: 20px 20px 20px 30px !important;
+}
+
+@media (max-width: $vp-768) {
+    .p-accordionheader {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+
+    .p-accordioncontent-content {
+        padding: 12px 12px 12px 12px !important;
+    }
+}
+
+
+// КОНФИРМ ДИАЛОГ
+
+.p-dialog {
+    overflow: hidden
+}
+
+.p-dialog-header {
+    @include spectral-semibold;
+    background: $color-base-white;
+    color: $color-base-text;
+}
+
+.p-dialog-content {
+    @include spectral-regular;
+    background: $color-base-white;
+    color: $color-base-text;
+}
+
+.p-confirmdialog-icon {
+    color: $color-base-text !important;
+}
+
+.p-dialog-footer {
+    background: $color-base-white;
+}
+
+.p-dialog-close-button {
+    background: transparent !important;
+    border: 1px solid $color-base-text !important;
+    width: 30px !important;
+    height: 30px !important;
+
+    .p-icon {
+        color: $color-base-text;
+    }
+}
+
+.p-confirmdialog-reject-button {
+    background: transparent !important;
+    color: $color-base-text !important;
+    border: 1px solid $color-gray-lighter !important;
+}
+
+.p-confirmdialog-accept-button {
+    background: $color-danger !important;
+    color: $color-base-white !important;
+}
+
+@media (max-width: $vp-768) {
+    .p-confirmdialog {
+        width: 95%;
+    }
+}
+
+// ТОСТ
+.p-toast-message-content {
+    @include spectral-regular;
+}
+
+.p-toast-message-text,
+.p-toast-detail {
+    @include spectral-regular;
+    color: $color-base-text !important;
+}
+
+
+// SELECT BUTTON
+
+.p-togglebutton {
+    background: $color-base-white !important;
+    border: none !important;
+    padding: 6px 10px !important;
+    color: $color-base-text !important;
+}
+
+@media (max-width: $vp-768) {
+    .p-togglebutton {
+        padding: 4px 8px !important;
+    }
+
+    .p-togglebutton-content {
+        font-size: 16px;
+    }
+}
+
+.p-togglebutton-checked .p-togglebutton-content {
+    background: #dddddd !important;
+}
+
+// SELECT
+
+.p-select {
+    background: $color-base-white !important;
+    border: none !important;
+}
+
+.p-select-overlay {
+    border: none !important;
+    background: $color-base-white !important;
+}
+
+.p-select-label {
+    color: $color-base-text !important;
+}
+
+.p-select-option {
+    color: $color-base-text !important;
+}
+
+.p-select-option.p-select-option-selected.p-focus {
+    background: $color-accent !important;
+}
+
+.p-select-option:not(.p-select-option-selected):not(.p-disabled):hover {
+    background: #efefef !important;
+}
+
+.p-select-option.p-select-option-selected,
+.p-select-option.p-select-option-selected.p-focus {
+    background: #dddddd !important;
+}
+
+// TABLE
+.p-datatable-header-cell {
+    color: $color-base-text !important;
+    background: #ffffff !important;
+}
+
+.p-datatable-tbody>tr {
+    color: $color-base-text !important;
+    background: #efefef !important;
+}
+
+.p-datatable.p-datatable-striped .p-datatable-tbody>tr.p-row-odd {
+    background: #ffffff !important;
+}
+
+.p-datatable-sort-icon,
+.p-datatable-sortable-column:not(.p-datatable-column-sorted):hover .p-datatable-sort-icon {
+    color: #7e7e7e !important;
+}
+
+.p-paginator {
+    background: #efefef !important;
+}
+
+.p-paginator-first,
+.p-paginator-prev,
+.p-paginator-page,
+.p-paginator-next,
+.p-paginator-last {
+    color: $color-base-text !important;
+}
+
+.p-paginator-page:not(.p-disabled):not(.p-paginator-page-selected):hover,
+.p-paginator-first:not(.p-disabled):hover,
+.p-paginator-prev:not(.p-disabled):hover,
+.p-paginator-next:not(.p-disabled):hover,
+.p-paginator-last:not(.p-disabled):hover,
+.p-paginator-page.p-paginator-page-selected {
+    background: $color-accent !important;
+    color: $color-light-text !important;
+}
+
+
+// СООБЩЕНИЯ ОБ ОШИБКАХ
+
+@media (max-width: $vp-768) {
+    .p-message-text {
+        font-size: 12px !important;
+    }
+}

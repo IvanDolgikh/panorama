@@ -1,12 +1,18 @@
 <template>
-    <div class="logo">
-        <div class="logo__container">
-            <component
-                :is="logo"
-                class="logo__icon"
-            />
+    <router-link :to="{
+        name: 'home'
+    }">
+
+        <div class="logo">
+            <div class="logo__container">
+
+                <component
+                    :is="logo"
+                    class="logo__icon"
+                />
+            </div>
         </div>
-    </div>
+    </router-link>
 </template>
 
 <script setup>
@@ -19,9 +25,6 @@ const props = defineProps({
     color: {
         type: String
     },
-    size: {
-        type: Object
-    }
 })
 
 const logo = computed(() => {
@@ -39,9 +42,17 @@ const logo = computed(() => {
         top: 50%;
         left: 50%;
         display: block;
-        width: v-bind('props.size.width + "px"');
-        height: v-bind('props.size.height + "px"');
+        width: 80px;
+        height: 80px;
+
+
+        @media (max-width: $vp-768) {
+            width: 65px;
+            height: 65px;
+        }
     }
+
+
 
     &__icon {
         width: 100%;

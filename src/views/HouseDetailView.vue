@@ -6,8 +6,8 @@
         >
 
             <div class="house-detail__title-container">
-                <h1 class="house-detail__title">{{ house.houseTitle }}</h1>
-                <p class="house-detail__description">{{ house.houseDescription }}</p>
+                <h1 class="house-detail__title">{{ house.title }}</h1>
+                <p class="house-detail__description">{{ house.description }}</p>
                 <p class="house-detail__time">Заезд 15:00<br>Выезд в 12:00</p>
 
             </div>
@@ -118,8 +118,8 @@
                         :src="otherHouse.gallery[5]"
                         :alt="otherHouse.imageAlt"
                     >
-                    <span>{{ otherHouse.houseTitle }}</span>
-                    <span>{{ otherHouse.houseDescription }}</span>
+                    <span>{{ otherHouse.title }}</span>
+                    <span>{{ otherHouse.description }}</span>
                     <router-link
                         :to="{
                             name: 'house-detail',
@@ -153,95 +153,55 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getHouseBySlug, houses } from '@/data/houses';
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useDataStore } from '@stores/data'
 
-// Правильные импорты Swiper
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Navigation, Scrollbar } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/scrollbar'
 
-// Стили
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/scrollbar';
-
-import { PhCaretRight } from '@phosphor-icons/vue'
-import { PhCaretLeft } from '@phosphor-icons/vue'
-
+import { PhCaretRight, PhCaretLeft } from '@phosphor-icons/vue'
 import HouseBooking from '@components/houses/HouseBooking.vue'
 import HouseSuccessBooking from '@components/houses/HouseSuccessBooking.vue'
 
+const store = useDataStore()
+const route = useRoute()
+const router = useRouter()
 
-const modules = [Navigation, Pagination, Scrollbar, A11y];
-
-const route = useRoute();
-const router = useRouter();
-const house = ref(null);
+const modules = [Navigation, Scrollbar]
 const swiper2 = ref(null)
 const isOpenDialog = ref(false)
 const isSuccesSubmit = ref(false)
 
-const onCloseDialog = () => {
-    isOpenDialog.value = false
-}
+const house = computed(() => store.getHouseBySlug(route.params.slug))
+const otherHouse = computed(() => store.getOtherHouse(route.params.slug))
 
-const onSuccessSubmit = () => {
-    isSuccesSubmit.value = true
-    isOpenDialog.value = false
-}
+const swiperPrev = () => swiper2.value?.swiper.slidePrev()
+const swiperNext = () => swiper2.value?.swiper.slideNext()
 
-const onCloseDialogSuccess = () => {
-    isSuccesSubmit.value = false
-}
-
-const swiperPrev = () => {
-    swiper2.value?.swiper.slidePrev()
-}
-
-const swiperNext = () => {
-    swiper2.value?.swiper.slideNext()
-}
-
-const loadHouse = (slug) => {
-    const foundHouse = getHouseBySlug(slug);
-
-    if (foundHouse) {
-        house.value = foundHouse;
-    } else {
-        router.push('/404');
-    }
-}
+const onCloseDialog = () => { isOpenDialog.value = false }
+const onSuccessSubmit = () => { isSuccesSubmit.value = true; isOpenDialog.value = false }
+const onCloseDialogSuccess = () => { isSuccesSubmit.value = false }
 
 watch(isSuccesSubmit, (value) => {
-    if (value) {
-        setTimeout(() => {
-            isSuccesSubmit.value = false
-        }, 5000)
+    if (value) setTimeout(() => { isSuccesSubmit.value = false }, 5000)
+})
+
+watch(() => route.params.slug, () => {
+    isOpenDialog.value = false
+    isSuccesSubmit.value = false
+})
+
+onMounted(async () => {
+    await store.loadHouses()
+
+    if (!house.value) {
+        router.push('/404')
     }
-});
-
-watch(() => route.params.slug, (newSlug) => {
-    if (newSlug) {
-        loadHouse(newSlug);
-        // Закрываем диалоги при смене страницы
-        isOpenDialog.value = false;
-        isSuccesSubmit.value = false;
-    }
-}, { immediate: true });
-
-
-const currentHouseSlug = computed(() => route.params.slug);
-
-const otherHouse = computed(() => {
-    return houses.find(h => h.slug !== currentHouseSlug.value);
-});
-
-onMounted(() => {
-    const slug = route.params.slug;
-    loadHouse(slug);
-});
+})
 </script>
 
 <style lang="scss">
@@ -251,7 +211,7 @@ onMounted(() => {
     }
 
     &__title-container {
-        width: $vp-1200;
+        max-width: $vp-1440;
         margin: 40px auto 40px auto;
         padding: 0 50px;
     }
@@ -290,31 +250,9 @@ onMounted(() => {
         justify-content: center;
         align-items: center;
 
-
         .swiper-wrapper {
             align-items: center;
         }
-
-        // &::before,
-        // &::after {
-        //     content: '';
-        //     position: absolute;
-        //     top: 0;
-        //     width: 100px;
-        //     height: 100%;
-        //     z-index: 2;
-        //     pointer-events: none;
-        // }
-
-        // &::before {
-        //     left: 0;
-        //     background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-        // }
-
-        // &::after {
-        //     right: 0;
-        //     background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-        // }
     }
 
     &__swiper {
@@ -323,7 +261,6 @@ onMounted(() => {
         width: 100%;
         height: 570px;
 
-        // 👇 СТИЛИ ДЛЯ КНОПОК НАВИГАЦИИ
         .swiper-button-prev,
         .swiper-button-next {
             display: flex !important;
@@ -369,26 +306,14 @@ onMounted(() => {
             width: 100%;
             height: 100%;
             border-radius: 20px;
-
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
-        // Активный слайд (центральный) - можно сделать немного больше
         &.swiper-slide-active {
             transform: scale(1.15);
             opacity: 1;
-            // margin: 0 40px;
-            // box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-
-        // Соседние слайды - можно сделать немного прозрачнее
-        // &.swiper-slide-next,
-        // &.swiper-slide-prev {
-        //     .house-detail__slide-inner {
-        //         transform: scale(0.95);
-        //     }
-        // }
     }
 
     &__image {
@@ -435,7 +360,7 @@ onMounted(() => {
     }
 
     &__info-container {
-        width: $vp-1200;
+        max-width: $vp-1440;
         padding: 0 50px;
         margin: 0 auto 70px auto;
         display: flex;
@@ -448,11 +373,7 @@ onMounted(() => {
         flex: 1;
         border: 1px solid $color-accent;
         padding: 30px;
-    }
 
-    &__info,
-    &__inside,
-    &__territory {
         h3 {
             color: $color-accent;
             text-transform: uppercase;
@@ -476,7 +397,7 @@ onMounted(() => {
             &::before {
                 content: "";
                 position: absolute;
-                top: 0.8em; // Высота строки
+                top: 0.8em;
                 left: 0;
                 width: 6px;
                 height: 2px;
@@ -507,7 +428,7 @@ onMounted(() => {
     }
 
     &__another-house {
-        width: $vp-1200;
+        max-width: $vp-1440;
         margin: 0 auto;
         padding: 0 50px;
 
@@ -532,7 +453,6 @@ onMounted(() => {
                 margin-bottom: 16px;
                 font-size: 16px;
             }
-
         }
     }
 
@@ -552,6 +472,191 @@ onMounted(() => {
 
         span {
             margin: 0 !important;
+        }
+    }
+}
+
+@media (max-width: $vp-1024) {
+    .house-detail {
+        &__title-container {
+            padding: 0 30px;
+            margin: 30px auto;
+        }
+
+        &__title {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        &__description {
+            width: 70%;
+            font-size: 18px;
+        }
+
+        &__time {
+            font-size: 18px;
+        }
+
+        &__swiper {
+            height: 450px;
+        }
+
+        &__slide {
+            width: 350px;
+            height: 350px;
+            margin-right: 20px;
+        }
+
+        &__control-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        &__button {
+            width: 300px;
+            height: 50px;
+            font-size: 16px;
+            margin-bottom: 50px;
+        }
+
+        &__info-container {
+            padding: 0 30px;
+            column-gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        &__info,
+        &__inside,
+        &__territory {
+            padding: 20px;
+
+            h3 {
+                font-size: 18px;
+            }
+
+            p,
+            li {
+                font-size: 14px;
+            }
+        }
+
+        &__another-house {
+            padding: 0 30px;
+
+            p {
+                font-size: 20px;
+            }
+        }
+    }
+}
+
+@media (max-width: $vp-768) {
+    .house-detail {
+        &__container {
+            margin: 0 auto 40px auto;
+        }
+
+        &__title-container {
+            padding: 0 16px;
+            margin: 20px auto;
+        }
+
+        &__title {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        &__description {
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        &__time {
+            font-size: 16px;
+        }
+
+        &__slider-wrapper {
+            margin-bottom: 40px;
+        }
+
+        &__swiper {
+            height: 300px;
+        }
+
+        &__slide {
+            width: 250px;
+            height: 250px;
+            margin-right: 12px;
+            border-radius: 12px;
+
+            &-inner {
+                border-radius: 12px;
+            }
+
+            &.swiper-slide-active {
+                transform: scale(1.1);
+            }
+        }
+
+        &__control {
+            display: none;
+        }
+
+        &__button {
+            width: calc(100% - 32px);
+            margin: 0 16px 40px 16px;
+            height: 48px;
+            font-size: 16px;
+        }
+
+        &__info-container {
+            flex-direction: column;
+            padding: 0 16px;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        &__info,
+        &__inside,
+        &__territory {
+            padding: 20px;
+
+            h3 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+
+            p,
+            li {
+                font-size: 14px;
+            }
+
+            ul {
+                margin-bottom: 16px;
+            }
+        }
+
+        &__inside::before,
+        &__territory::before {
+            display: none;
+        }
+
+        &__another-house {
+            padding: 0 16px;
+
+            p {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+        }
+
+        &__another-house-card {
+            max-width: 100%;
+        }
+
+        &__another-house-image {
+            height: 180px;
         }
     }
 }

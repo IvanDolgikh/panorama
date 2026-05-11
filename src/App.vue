@@ -1,9 +1,11 @@
 <template>
     <div class="app">
-        <Header ref="headerComponent" />
+        <Header
+            v-if="$route.name !== 'admin'"
+            ref="headerComponent"
+        />
         <RouterView />
-        <Footer />
-
+        <Footer v-if="$route.name !== 'admin'" />
     </div>
 </template>
 
@@ -12,6 +14,7 @@
 import Header from '@components/TheHeader.vue';
 import Footer from '@components/TheFooter.vue';
 import { ref, provide, watchEffect } from 'vue'
+
 
 const headerComponent = ref(null)
 const headerHeight = ref(0)

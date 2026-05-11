@@ -12,7 +12,7 @@
 
             <div class="houses__list">
                 <template
-                    v-for="(house, index) in houses"
+                    v-for="(house, index) in store.houses"
                     :key="index"
                 >
                     <House
@@ -22,7 +22,7 @@
 
                     <!-- Добавляем разделитель после каждого дома, кроме последнего -->
                     <div
-                        v-if="index < houses.length - 1"
+                        v-if="index < store.houses.length - 1"
                         class="houses__separator"
                     ></div>
                 </template>
@@ -32,23 +32,51 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import House from './House.vue';
+import { useDataStore } from '@stores/data'
 
-import { houses } from '@/data/houses'
+const store = useDataStore()
+
+onMounted(async () => {
+    await store.loadHouses()
+})
 
 </script>
 
 <style lang="scss">
+$vp-1024: 1024px;
+$vp-768: 768px;
+
 .houses {
     &__container {
-        width: $vp-1200;
+        width: $vp-1440;
         margin: 0 auto 80px auto;
         padding: 0 50px;
+
+        @media (max-width: $vp-1024) {
+            width: 100%;
+            margin: 0 auto 60px auto;
+            padding: 0 30px;
+        }
+
+        @media (max-width: $vp-768) {
+            margin: 0 auto 40px auto;
+            padding: 0 16px;
+        }
     }
 
     &__info {
         margin: 0 auto;
         margin-bottom: 70px;
+
+        @media (max-width: $vp-1024) {
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: $vp-768) {
+            margin-bottom: 40px;
+        }
     }
 
     &__title {
@@ -57,6 +85,16 @@ import { houses } from '@/data/houses'
         text-align: center;
         text-transform: uppercase;
         margin-bottom: 40px;
+
+        @media (max-width: $vp-1024) {
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: $vp-768) {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
     }
 
     &__text {
@@ -64,6 +102,17 @@ import { houses } from '@/data/houses'
         text-align: center;
         width: 80%;
         margin: 0 auto;
+
+        @media (max-width: $vp-1024) {
+            font-size: 20px;
+            width: 90%;
+        }
+
+        @media (max-width: $vp-768) {
+            font-size: 16px;
+            width: 100%;
+            line-height: 1.5;
+        }
     }
 
     &__list {
@@ -71,23 +120,39 @@ import { houses } from '@/data/houses'
         flex-direction: column;
     }
 
-
     &__separator {
         width: 60%;
         height: 2px;
-        margin: 60px auto; // Отступы сверху и снизу
+        margin: 60px auto;
         background: linear-gradient(to right,
                 transparent,
                 $color-accent,
                 transparent);
         opacity: 0.5;
-
-        // Анимированная линия при наведении
         transition: opacity 0.3s, width 0.3s;
+
+        @media (max-width: $vp-1024) {
+            width: 70%;
+            margin: 50px auto;
+        }
+
+        @media (max-width: $vp-768) {
+            width: 80%;
+            margin: 40px auto;
+
+            // Убираем анимацию при наведении на мобильных
+            &:hover {
+                width: 80%;
+            }
+        }
 
         &:hover {
             opacity: 1;
             width: 80%;
+
+            @media (max-width: $vp-768) {
+                width: 80%; // Фиксируем ширину на мобильных
+            }
         }
     }
 }

@@ -13,7 +13,8 @@ export default defineConfig({
             '@styles': path.resolve(__dirname, './src/assets/styles'),
             '@svg-images': path.resolve(__dirname, './src/assets/images/svg'),
             '@other-images': path.resolve(__dirname, './src/assets/images/other'),
-            '@services': path.resolve(__dirname, './src/services')
+            '@services': path.resolve(__dirname, './src/services'),
+            '@stores': path.resolve(__dirname, './src/stores'),
         }
     },
     css: {

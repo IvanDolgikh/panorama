@@ -7,7 +7,6 @@
 
             <div class="contacts__map">
                 <div class="contacts__map-wrapper">
-
                     <yandex-map
                         v-model="map"
                         :settings="{
@@ -63,11 +62,10 @@
             </div>
         </div>
     </section>
-
 </template>
 
 <script setup>
-import { shallowRef } from 'vue';
+import { ref } from 'vue';
 import {
     YandexMap,
     YandexMapDefaultSchemeLayer,
@@ -75,17 +73,18 @@ import {
     YandexMapDefaultMarker,
 } from 'vue-yandex-maps';
 
-const map = shallowRef(null);
+const map = ref(null);
 </script>
 
 <style lang="scss">
 .contacts {
-
     &__container {
         display: grid;
         grid-template-columns: 1fr 1fr;
         column-gap: 70px;
+        max-width: $vp-1440;
         margin: 0 auto 50px auto;
+        padding: 0 50px;
         font-weight: 300;
     }
 
@@ -95,6 +94,8 @@ const map = shallowRef(null);
 
     &__map-wrapper {
         height: 500px;
+        border-radius: 20px;
+        overflow: hidden;
     }
 
     &__info {
@@ -111,22 +112,35 @@ const map = shallowRef(null);
     &__phone-link,
     &__email-link {
         display: block;
+        font-size: 20px;
+        color: $color-base-text;
+        text-decoration: none;
+        transition: color 0.3s;
+
+        &:hover {
+            color: $color-accent;
+        }
+    }
+
+    &__phone-link {
+        margin-bottom: 16px;
+        font-weight: 500;
     }
 
     &__email-link {
-        margin-bottom: 30px
+        margin-bottom: 30px;
     }
 
     &__address {
         margin-bottom: 30px;
+        font-size: 18px;
+        line-height: 1.5;
     }
-
 
     &__social {
         display: flex;
         width: fit-content;
         column-gap: 12px;
-
     }
 
     &__social-link {
@@ -138,10 +152,94 @@ const map = shallowRef(null);
         cursor: pointer;
         background-color: transparent;
         padding: 0;
+        transition: transform 0.3s;
+
+        &:hover {
+            transform: scale(1.1);
+        }
 
         span {
-            font-size: 24px;
+            font-size: 28px;
             color: $color-accent;
+        }
+    }
+}
+
+@media (max-width: $vp-1024) {
+    .contacts {
+        &__container {
+            column-gap: 40px;
+            padding: 0 30px;
+            margin: 0 auto 40px auto;
+        }
+
+        &__map-wrapper {
+            height: 400px;
+            border-radius: 16px;
+        }
+
+        &__title {
+            font-size: 30px;
+            margin-bottom: 24px;
+        }
+
+        &__phone-link,
+        &__email-link {
+            font-size: 18px;
+        }
+
+        &__address {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        &__social-link span {
+            font-size: 24px;
+        }
+    }
+}
+
+@media (max-width: $vp-768) {
+    .contacts {
+        &__container {
+            grid-template-columns: 1fr;
+            row-gap: 30px;
+            padding: 0 16px;
+            margin: 0 auto 30px auto;
+        }
+
+        &__map-wrapper {
+            height: 300px;
+            border-radius: 14px;
+        }
+
+        &__info {
+            margin: 0;
+            text-align: center;
+        }
+
+        &__title {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        &__phone-link,
+        &__email-link {
+            font-size: 18px;
+        }
+
+        &__address {
+            font-size: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        &__social {
+            margin: 0 auto;
+        }
+
+        &__social-link span {
+            font-size: 28px;
         }
     }
 }

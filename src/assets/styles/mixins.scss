@@ -3,60 +3,60 @@
 // Spectral
 
 @mixin spectral-extralight {
-    font-family: "Spectral", serif;
-    font-weight: 200;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 200 !important;
+    font-style: normal !important;
 }
 
 @mixin spectral-light {
-    font-family: "Spectral", serif;
-    font-weight: 300;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 300 !important;
+    font-style: normal !important;
 }
 
 @mixin spectral-regular {
-    font-family: "Spectral", serif;
-    font-weight: 400;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
 }
 
 @mixin spectral-medium {
-    font-family: "Spectral", serif;
-    font-weight: 500;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
 }
 
 @mixin spectral-semibold {
-    font-family: "Spectral", serif;
-    font-weight: 600;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 600 !important;
+    font-style: normal !important;
 }
 
 @mixin spectral-bold {
-    font-family: "Spectral", serif;
-    font-weight: 700;
-    font-style: normal;
+    font-family: "Spectral", serif !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
 }
 
 // Lora
 
 @mixin lora-regular {
-    font-family: "Lora", serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
+    font-family: "Lora", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
 }
 
 @mixin lora-medium {
-    font-family: "Lora", serif;
-    font-optical-sizing: auto;
-    font-weight: 500;
-    font-style: normal;
+    font-family: "Lora", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
 }
 
 @mixin lora-semibold {
-    font-family: "Lora", serif;
-    font-optical-sizing: auto;
-    font-weight: 600;
-    font-style: normal;
+    font-family: "Lora", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 600 !important;
+    font-style: normal !important;
 }

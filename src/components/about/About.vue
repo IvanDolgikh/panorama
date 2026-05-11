@@ -15,7 +15,7 @@
 <style lang="scss">
 .about {
     &__container {
-        width: $vp-1200;
+        width: $vp-1440;
         margin: 0 auto 70px auto;
         padding: 0 50px;
     }
@@ -36,6 +36,50 @@
 
         &:not(:last-child) {
             margin-bottom: 20px;
+        }
+    }
+}
+
+@media (max-width: $vp-1024) {
+    .about {
+        &__container {
+            width: 100%;
+            padding: 0 30px;
+            margin: 0 auto 50px auto;
+        }
+
+        &__title {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        &__text {
+            font-size: 20px;
+            width: 90%;
+        }
+    }
+}
+
+@media (max-width: $vp-768) {
+    .about {
+        &__container {
+            padding: 0 20px;
+            margin: 0 auto 40px auto;
+        }
+
+        &__title {
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+
+        &__text {
+            font-size: 16px;
+            width: 100%;
+            line-height: 1.5;
+
+            &:not(:last-child) {
+                margin-bottom: 16px;
+            }
         }
     }
 }

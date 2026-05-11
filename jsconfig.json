@@ -22,6 +22,9 @@
             ],
             "@services/*": [
                 "./src/services/*"
+            ],
+            "@stores/*": [
+                "./src/store/*"
             ]
         }
     },

@@ -8,80 +8,49 @@
         @update:visible="onClose"
     >
         <div class="booking__container">
-            <p class="booking__house-title">{{ house.houseTitle }}</p>
+            <p class="booking__house-title">{{ house.title }}</p>
 
-            <Form
-                v-slot="$form"
-                :initialValues
-                :resolver
-                @submit="onFormSubmit"
+            <form
+                @submit.prevent="onFormSubmit"
                 class="booking__form"
             >
-                <div>
+                <div class="booking__date-container">
                     <label
                         class="booking__input-label"
                         for="startDate"
-                    >Дата заезда</label>
+                    >Даты проживания</label>
                     <DatePicker
+                        v-model="form.dates"
                         class="booking__date"
-                        name="startDate"
-                        id="startDate"
+                        inputId="startDate"
                         fluid
                         showClear
                         showIcon
+                        selectionMode="range"
+                        :numberOfMonths="2"
+                        :manualInput="false"
                         iconDisplay="input"
                         :minDate="new Date()"
                         :disabledDates="disableDate"
                     >
                         <template #date="slotProps">
-                            <div
-                                class="date-cell"
+                            <span
+                                v-tooltip.top="getCheckoutHint(slotProps.date)"
                                 :class="{ 'booking__date-booked': isDateBooked(slotProps.date) }"
                             >
                                 {{ slotProps.date.day }}
-                            </div>
+                            </span>
+                            <span class="booking__date-price">{{ priceOfDay(slotProps.date) }}₽</span>
                         </template>
-
                     </DatePicker>
                     <Message
-                        v-if="$form.startDate?.invalid"
+                        v-if="errors.dates"
                         severity="error"
                         size="small"
                         variant="simple"
-                    >{{ $form.startDate.error?.message }}</Message>
-                </div>
-
-                <div>
-                    <label
-                        class="booking__input-label"
-                        for="endDate"
-                    >Дата выезда</label>
-                    <DatePicker
-                        class="booking__date"
-                        name="endDate"
-                        id="endDate"
-                        fluid
-                        showClear
-                        showIcon
-                        iconDisplay="input"
-                        :minDate="new Date()"
-                        :disabledDates="disableDate"
                     >
-                        <template #date="slotProps">
-                            <div
-                                class="date-cell"
-                                :class="{ 'booking__date-booked': isDateBooked(slotProps.date) }"
-                            >
-                                {{ slotProps.date.day }}
-                            </div>
-                        </template>
-                    </DatePicker>
-                    <Message
-                        v-if="$form.endDate?.invalid"
-                        severity="error"
-                        size="small"
-                        variant="simple"
-                    >{{ $form.endDate.error?.message }}</Message>
+                        {{ errors.dates }}
+                    </Message>
                 </div>
 
                 <div class="booking__username">
@@ -90,18 +59,20 @@
                         for="username"
                     >Ваше имя</label>
                     <InputText
+                        v-model="form.username"
                         class="booking__input"
                         inputId="username"
                         type="text"
                         placeholder="Имя"
-                        name="username"
                     />
                     <Message
-                        v-if="$form.username?.invalid"
+                        v-if="errors.username"
                         severity="error"
                         size="small"
                         variant="simple"
-                    >{{ $form.username.error?.message }}</Message>
+                    >
+                        {{ errors.username }}
+                    </Message>
                 </div>
 
                 <div class="booking__phone">
@@ -110,41 +81,45 @@
                         for="phone"
                     >Номер телефона</label>
                     <InputMask
-                        v-model="phone"
+                        v-model="form.phone"
                         class="booking__input"
                         inputId="phone"
-                        name="phone"
                         mask="+7 (999) 999-9999"
                         placeholder="+7 (999) 999-9999"
                         fluid
                     />
                     <Message
-                        v-if="$form.phone?.invalid"
+                        v-if="errors.phone"
                         severity="error"
                         size="small"
                         variant="simple"
-                    >{{ $form.phone.error?.message }}</Message>
+                    >
+                        {{ errors.phone }}
+                    </Message>
                 </div>
 
                 <div class="booking__people-amount-container">
                     <label
                         class="booking__input-label"
-                        for="people-amount"
+                        for="peopleAmount"
                     >Количество человек</label>
                     <InputNumber
+                        v-model="form.peopleAmount"
                         inputClass="booking__input"
-                        id="people-amount"
-                        inputId="integeronly"
-                        name="peopleAmount"
+                        inputId="peopleAmount"
                         placeholder="0"
+                        :min="1"
+                        :max="house.maxGuests || 4"
                         fluid
                     />
                     <Message
-                        v-if="$form.peopleAmount?.invalid"
+                        v-if="errors.peopleAmount"
                         severity="error"
                         size="small"
                         variant="simple"
-                    >{{ $form.peopleAmount.error?.message }}</Message>
+                    >
+                        {{ errors.peopleAmount }}
+                    </Message>
                 </div>
 
                 <div class="booking__wishes">
@@ -153,7 +128,8 @@
                         for="wishes"
                     >Ваши пожелания</label>
                     <Textarea
-                        name="wishes"
+                        v-model="form.wishes"
+                        inputId="wishes"
                         rows="2"
                         cols="30"
                         style="resize: none"
@@ -163,23 +139,26 @@
 
                 <div class="booking__agreement">
                     <Checkbox
-                        v-model="agreement"
+                        v-model="form.agreement"
                         class="my-checkbox"
-                        inputId="ingredient1"
-                        name="agreement"
-                        value="Cheese"
+                        inputId="agreement"
+                        binary
                     />
                     <label
                         class="booking__input-label"
-                        for="ingredient1"
-                    > Нажимая на кнопку, вы даете согласие на обработку персональных данных и соглашаетесь c политикой конфиденциальности </label>
-
+                        for="agreement"
+                    >
+                        Нажимая на кнопку, вы даете согласие на обработку персональных данных
+                        и соглашаетесь c политикой конфиденциальности
+                    </label>
                     <Message
-                        v-if="$form.agreement?.invalid"
+                        v-if="errors.agreement"
                         severity="error"
                         size="small"
                         variant="simple"
-                    >{{ $form.agreement.error?.message }}</Message>
+                    >
+                        {{ errors.agreement }}
+                    </Message>
                 </div>
 
                 <Button
@@ -189,14 +168,13 @@
                     label="Отправить"
                     :loading="isLoading"
                 />
-            </Form>
+            </form>
         </div>
     </Dialog>
 </template>
 
 <script setup>
-
-import { onMounted, reactive, ref } from 'vue';
+import { ref, reactive, watch, computed, onMounted, onBeforeUnmount } from 'vue';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
@@ -206,35 +184,29 @@ import Message from 'primevue/message';
 import Dialog from 'primevue/dialog';
 import DatePicker from 'primevue/datepicker';
 import Textarea from 'primevue/textarea';
-import { Form } from '@primevue/forms';
 
-import { sendTelegramNotification } from '@services/telegram'
-
+import { sendTelegramNotification } from '@services/telegram';
 import { db } from '@services/firebase';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import {
+    query,
+    where,
+    getDocs,
+    collection,
+    onSnapshot,
+    addDoc
+} from 'firebase/firestore';
+
+import { syncExternalCalendars, publishICS } from '@services/calendarSync'
 
 const props = defineProps({
-    house: {
-        type: Object,
-        required: true
-    },
-    isOpenDialog: {
-        type: Boolean,
-        required: true
-    }
-})
+    house: { type: Object, required: true },
+    isOpenDialog: { type: Boolean, required: true }
+});
 
-const emit = defineEmits(['close-dialog', 'success-submit'])
+const emit = defineEmits(['close-dialog', 'success-submit']);
 
-const onClose = () => {
-    emit('close-dialog')
-}
-
-
-
-const initialValues = reactive({
-    startDate: null,
-    endDate: null,
+const form = reactive({
+    dates: null,
     username: '',
     phone: '',
     peopleAmount: null,
@@ -242,176 +214,497 @@ const initialValues = reactive({
     agreement: false
 });
 
-const disableDate = ref([])
+const isSubmitted = ref(false);
+const allBookedDates = ref([]);      // Все занятые даты (дни проживания)
+const disableDate = ref([]);         // Динамический массив для DatePicker
+const isLoading = ref(false);
+const serverError = ref('');
+let unsubscribeFromBookings = null;
 
-const isLoading = ref(false)
+// ЦЕНА В ЗАВИСИМОСТИ ОТ ДНЯ НЕДЕЛИ
+const priceOfDay = (date) => {
+    const currentDate = new Date(date.year, date.month, date.day);
 
-const formatLocalDate = (date) => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
+    // Проверяем особые периоды В первую очередь
+    if (props.house?.pricing?.custom) {
+        for (const period of props.house.pricing.custom) {
+            const periodStart = new Date(period.startDate)
+            const periodEnd = new Date(period.endDate)
+            periodStart.setHours(0, 0, 0, 0)
+            periodEnd.setHours(0, 0, 0, 0)
+
+            if (currentDate >= periodStart && currentDate <= periodEnd) {
+                return period.price
+            }
+        }
+    }
+
+    // Потом проверяем выходные
+    const dayOfWeek = currentDate.getDay();
+    if (dayOfWeek === 5 || dayOfWeek === 6) {
+        return props.house.pricing.weekend;
+    }
+
+    return props.house.pricing.base;
+};
+
+// РАСЧЁТ СТОИМОСТИ
+const calculateTotalPrice = (startDate, endDate) => {
+    if (!props.house?.pricing) return 0
+
+    let total = 0
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const current = new Date(start)
+
+    while (current < end) {
+        const dayOfWeek = current.getDay()
+        const isWeekend = dayOfWeek === 5 || dayOfWeek === 6
+
+        let price = isWeekend ? props.house.pricing.weekend : props.house.pricing.base
+
+        if (props.house.pricing.custom) {
+            for (const period of props.house.pricing.custom) {
+                const periodStart = new Date(period.startDate)
+                const periodEnd = new Date(period.endDate)
+                periodStart.setHours(0, 0, 0, 0)
+                periodEnd.setHours(0, 0, 0, 0)
+
+                if (current >= periodStart && current <= periodEnd) {
+                    price = period.price
+                    break
+                }
+            }
+        }
+
+        total += price
+        current.setDate(current.getDate() + 1)
+    }
+
+    return total
 }
 
+// ОБРАБОТКА ЗАНЯТЫХ ДАТ
+const processBookedDates = (snapshot) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
+    const dates = [];
 
-const isDateBooked = (date) => {
-    if (!disableDate.value.length) return false;
-
-    // Создаем дату из полей day/month/year
-    const currentDate = new Date(date.year, date.month, date.day);
-    currentDate.setHours(0, 0, 0, 0);
-
-    // Проверяем, есть ли эта дата в списке занятых
-    return disableDate.value.some(bookedDate => {
-        const booked = new Date(bookedDate);
-        booked.setHours(0, 0, 0, 0);
-
-        return booked.getTime() === currentDate.getTime();
-    });
-};
-const resolver = ({ values }) => {
-    const errors = {};
-
-    if (!values.startDate) {
-        errors.startDate = [{ message: 'Укажите дату заезда' }];
-    }
-
-    if (!values.endDate) {
-        errors.endDate = [{ message: 'Укажите дату выезда' }];
-    }
-
-    if (!values.username) {
-        errors.username = [{ message: 'Укажите имя' }];
-    }
-
-    if (!values.phone) {
-        errors.phone = [{ message: 'Укажите номер телефона' }];
-    }
-
-    if (!values.peopleAmount) {
-        errors.peopleAmount = [{ message: 'Укажите количество человек' }];
-    }
-
-    if (!values.agreement) {
-        errors.agreement = [{ message: 'Необходимо дать согласие на обработку персональных данных' }];
-    }
-
-    return {
-        values,
-        errors
+    const parseDate = (dateStr) => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
     };
+
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!data.startDate || !data.endDate) return;
+
+        const startDate = parseDate(data.startDate);
+        const endDate = parseDate(data.endDate);
+        const startTime = startDate.getTime();
+        const endTime = endDate.getTime();
+
+        if (endTime < todayTime) return;
+
+        const start = new Date(Math.max(startTime, todayTime));
+        const currentDate = new Date(start);
+
+        // Блокируем только дни проживания (день выезда НЕ блокируем)
+        const lastBookedDate = new Date(endDate);
+        lastBookedDate.setDate(lastBookedDate.getDate() - 1);
+
+        while (currentDate <= lastBookedDate) {
+            dates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    });
+
+    // Убираем дубликаты
+    const uniqueDates = dates.filter((date, index) =>
+        index === dates.findIndex(d => d.getTime() === date.getTime())
+    );
+
+    // Сохраняем все занятые даты
+    allBookedDates.value = uniqueDates;
+
+    // Обновляем disableDate в зависимости от выбранной даты заезда
+    updateDisabledDates();
+
+    return uniqueDates;
 };
 
+// ДИНАМИЧЕСКОЕ ОБНОВЛЕНИЕ DISABLED DATES
+const updateDisabledDates = () => {
+    // Если дата заезда НЕ выбрана — блокируем все занятые дни
+    if (!form.dates || !form.dates[0]) {
+        disableDate.value = [...allBookedDates.value];
+        return;
+    }
 
-const onFormSubmit = async ({ valid, values }) => {
-    if (!valid) return;
+    const startDate = form.dates[0];
+    const startTime = new Date(startDate).setHours(0, 0, 0, 0);
 
-    try {
+    // Если выбрана только дата заезда
+    if (form.dates[0] && !form.dates[1]) {
+        const disabled = [];
 
-        isLoading.value = true
-        console.log('start', formatLocalDate(values.startDate))
-        console.log('end', formatLocalDate(values.endDate))
-        const docRef = await addDoc(collection(db, 'bookings'), {
-            houseId: props.house.id,
-            houseTitle: props.house.houseTitle,
-            startDate: formatLocalDate(values.startDate) || values.startDate,
-            endDate: formatLocalDate(values.endDate) || values.endDate,
-            username: values.username,
-            phone: values.phone,
-            peopleAmount: values.peopleAmount,
-            wishes: values.wishes || '',
-            createdAt: new Date().toISOString(),
+        // Находим занятые дни после даты заезда
+        const bookedAfterStart = allBookedDates.value
+            .filter(d => d.getTime() > startTime)
+            .sort((a, b) => a.getTime() - b.getTime());
+
+        allBookedDates.value.forEach(bookedDate => {
+            const bookedTime = bookedDate.getTime();
+
+            // Все даты до заезда блокируем
+            if (bookedTime < startTime) {
+                disabled.push(bookedDate);
+                return;
+            }
+
+            // Если это не первый занятый день после заезда — блокируем
+            // Первый занятый день после заезда = потенциальный день выезда (не блокируем)
+            if (bookedAfterStart.length > 0 && bookedTime !== bookedAfterStart[0].getTime()) {
+                disabled.push(bookedDate);
+            }
         });
 
-        console.log('✅ Успешно! ID:', docRef.id);
-        emit('success-submit', true)
+        disableDate.value = disabled;
+        return;
+    }
 
-        const message = `
-❗❗❗ <b>НОВОЕ БРОНИРОВАНИЕ</b>
+    // Если обе даты выбраны - не блокируем выбранные даты
+    if (form.dates[0] && form.dates[1]) {
+        const endDate = form.dates[1];
+        const endTime = new Date(endDate).setHours(0, 0, 0, 0);
 
-🏡 <b>ДОМ</b>
-• ${props.house.houseTitle}
+        const disabled = [];
 
-📅 <b>ДАТЫ</b>
-• Заезд: ${formatLocalDate(values.startDate)}
-• Выезд: ${formatLocalDate(values.endDate)}
-• Ночей: ${Math.ceil((new Date(values.endDate) - new Date(values.startDate)) / (1000 * 60 * 60 * 24))}
+        allBookedDates.value.forEach(bookedDate => {
+            const bookedTime = bookedDate.getTime();
 
-👥 <b>ГОСТИ</b>
-• Количество: ${values.peopleAmount}
+            // Не блокируем выбранные даты (заезд и выезд)
+            if (bookedTime === startTime || bookedTime === endTime) {
+                return;
+            }
 
-👤 <b>КОНТАКТЫ</b>
-• Имя: ${values.username}
-• Телефон: ${values.phone}
-• Пожелания: ${values.wishes || 'Нет'}
+            disabled.push(bookedDate);
+        });
 
-<b>Создано:</b> ${new Date().toLocaleString('ru-RU')}
-`
+        disableDate.value = disabled;
+        return;
+    }
 
-        await sendTelegramNotification(message)
+    // По умолчанию - блокируем все занятые
+    disableDate.value = [...allBookedDates.value];
+};
 
-    } catch (error) {
-        console.error('❌ Детальная ошибка:', error);
-    } finally {
-        isLoading.value = false
+// Следим за изменением form.dates
+watch(() => form.dates, () => {
+    updateDisabledDates();
+}, { deep: true });
+
+// WEBSOCKET ПОДПИСКА 
+const startRealtimeListener = () => {
+    if (!props.isOpenDialog) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayISO = today.toISOString().split('T')[0];
+
+    const q = query(
+        collection(db, 'bookings'),
+        where('houseId', '==', props.house.id),
+        where('endDate', '>=', todayISO)
+    );
+
+    unsubscribeFromBookings = onSnapshot(q,
+        (snapshot) => {
+            processBookedDates(snapshot);
+        },
+        (error) => {
+            setTimeout(() => {
+                if (props.isOpenDialog) loadBookedDatesOnce();
+            }, 3000);
+        }
+    );
+};
+
+const stopRealtimeListener = () => {
+    if (unsubscribeFromBookings) {
+        unsubscribeFromBookings();
+        unsubscribeFromBookings = null;
     }
 };
 
-const loadBookedDates = async () => {
-    if (!props.isOpenDialog) return
+const loadBookedDatesOnce = async () => {
     try {
-        const bookingsRef = collection(db, 'bookings');
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayISO = today.toISOString().split('T')[0];
 
         const q = query(
-            bookingsRef,
+            collection(db, 'bookings'),
             where('houseId', '==', props.house.id),
             where('endDate', '>=', todayISO)
         );
 
         const querySnapshot = await getDocs(q);
-
-        const dates = [];
-        const todayTime = today.getTime();
-
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const startTime = new Date(data.startDate).getTime();
-            const endTime = new Date(data.endDate).getTime();
-
-            if (endTime < todayTime) return;
-
-            // 👇 ВАЖНО: начинаем с даты заезда
-            const startDate = new Date(Math.max(startTime, todayTime));
-            // 👇 ВАЖНО: заканчиваем ДО даты выезда (выезд утром)
-            const endDate = new Date(endTime);
-
-            // Уменьшаем endDate на 1 день, т.к. в день выезда можно заехать
-            const lastBookedDate = new Date(endDate);
-            lastBookedDate.setDate(lastBookedDate.getDate() - 1);
-
-            const currentDate = new Date(startDate);
-            // Включаем дату заезда, исключаем дату выезда
-            while (currentDate <= lastBookedDate) {
-                dates.push(new Date(currentDate));
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        });
-
-        disableDate.value = dates;
-        console.log('✅ Загружено занятых дат (выезд свободен):', dates);
-
+        processBookedDates(querySnapshot);
     } catch (error) {
-        console.error('❌ Ошибка загрузки:', error);
+        console.error(error);
     }
 };
 
-onMounted(() => {
-    loadBookedDates()
-})
+// ПРОВЕРКА ДОСТУПНОСТИ ДАТ
+const checkDatesAvailability = async (startStr, endStr) => {
+    // console.log('Проверка доступности:', { startStr, endStr });
+
+    const q = query(
+        collection(db, 'bookings'),
+        where('houseId', '==', props.house.id),
+        where('endDate', '>', startStr),
+        where('startDate', '<', endStr)
+    );
+
+    const snapshot = await getDocs(q);
+    // console.log('Пересекающиеся броней:', snapshot.size);
+
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        // console.log(`Пересечение с бронью: ${data.startDate} - ${data.endDate}`);
+    });
+
+    return snapshot.empty;
+};
+
+// ПРОВЕРКА ЗАНЯТЫХ ДАТ В ДИАПАЗОНЕ
+const hasBookedDatesInRange = (start, end) => {
+    if (!start || !end) return false;
+
+    const startTime = new Date(start).setHours(0, 0, 0, 0);
+    const endTime = new Date(end).setHours(0, 0, 0, 0);
+
+    return allBookedDates.value.some(bookedDate => {
+        const bookedTime = bookedDate.getTime();
+        return bookedTime > startTime && bookedTime < endTime;
+    });
+};
+
+// СОЗДАНИЕ БРОНИ
+const createBooking = async (startStr, endStr) => {
+    const totalPrice = calculateTotalPrice(startStr, endStr)
+    const nights = Math.ceil((new Date(endStr) - new Date(startStr)) / (1000 * 60 * 60 * 24))
+    const bookingData = {
+        houseId: props.house.id,
+        houseTitle: props.house.title,
+        startDate: startStr,
+        endDate: endStr,
+        username: form.username,
+        phone: form.phone,
+        peopleAmount: form.peopleAmount,
+        wishes: form.wishes || '',
+        totalPrice: totalPrice,
+        nights: nights,
+        createdAt: new Date().toLocaleString('ru-RU'),
+    };
+    const docRef = await addDoc(collection(db, 'bookings'), bookingData);
+    return { id: docRef.id, ...bookingData };
+};
+
+// ВАЛИДАЦИЯ
+const errors = computed(() => {
+    const newErrors = {
+        dates: serverError.value || '',
+        username: '',
+        phone: '',
+        peopleAmount: '',
+        agreement: ''
+    };
+
+    if (!isSubmitted.value) return newErrors;
+
+    if (!form.dates?.[0]) newErrors.dates = newErrors.dates || 'Укажите дату заезда';
+    if (!form.dates?.[1]) newErrors.dates = newErrors.dates || 'Укажите дату выезда';
+    if (!form.username?.trim()) newErrors.username = 'Укажите имя';
+    if (!form.phone) newErrors.phone = 'Укажите номер телефона';
+    else if (form.phone.includes('_')) newErrors.phone = 'Введите полный номер телефона';
+    if (!form.peopleAmount || form.peopleAmount < 1) newErrors.peopleAmount = 'Укажите количество человек';
+    if (!form.agreement) newErrors.agreement = 'Необходимо дать согласие';
+
+    return newErrors;
+});
+
+const isValid = computed(() => !Object.values(errors.value).some(error => error !== ''));
+
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+const formatLocalDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const isDateBooked = (date) => {
+    if (!disableDate.value.length) return false;
+
+    const currentDate = new Date(date.year, date.month, date.day);
+    currentDate.setHours(0, 0, 0, 0);
+
+    return disableDate.value.some(disabledDate => {
+        const disabled = new Date(disabledDate);
+        disabled.setHours(0, 0, 0, 0);
+        return disabled.getTime() === currentDate.getTime();
+    });
+};
+
+const resetForm = () => {
+    form.dates = null;
+    form.username = '';
+    form.phone = '';
+    form.peopleAmount = null;
+    form.wishes = '';
+    form.agreement = false;
+    isSubmitted.value = false;
+    serverError.value = '';
+};
+
+const publishGistICS = async () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayStr = today.toISOString().split('T')[0]
+
+    const q = query(
+        collection(db, 'bookings'),
+        where('endDate', '>=', todayStr)
+    )
+    const snapshot = await getDocs(q)
+    const activeBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    publishICS(activeBookings, props.house.id, props.house.gistId)
+}
+
+const createMessageForTelegram = (startDate, endDate) => {
+    const startStr = formatLocalDate(startDate);
+    const endStr = formatLocalDate(endDate);
+    const nightsCount = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+    const message = `
+❗❗❗ <b>НОВОЕ БРОНИРОВАНИЕ</b>
+
+🏡 <b>ДОМ</b>
+• ${props.house.title}
+
+📅 <b>ДАТЫ</b>
+• Заезд: ${startStr}
+• Выезд: ${endStr}
+• Ночей: ${nightsCount}
+
+👥 <b>ГОСТИ</b>
+• Количество: ${form.peopleAmount}
+
+👤 <b>КОНТАКТЫ</b>
+• Имя: ${form.username}
+• Телефон: ${form.phone}
+• Пожелания: ${form.wishes || 'Нет'}
+`;
+
+    return message
+}
+
+const onClose = () => emit('close-dialog');
+
+// ОТПРАВКА ФОРМЫ
+const onFormSubmit = async () => {
+    isSubmitted.value = true;
+    serverError.value = '';
+
+    if (!isValid.value) return;
+
+    try {
+        isLoading.value = true;
+
+        const [startDate, endDate] = form.dates;
+        const startStr = formatLocalDate(startDate);
+        const endStr = formatLocalDate(endDate);
+
+        // Проверяем, нет ли занятых дат в диапазоне
+        if (hasBookedDatesInRange(startDate, endDate)) {
+            serverError.value = 'В выбранном диапазоне есть занятые даты. Выберите другие даты.';
+            isLoading.value = false;
+            return;
+        }
+
+        // Проверка доступности через Firestore
+        const isAvailable = await checkDatesAvailability(startStr, endStr);
+
+        if (!isAvailable) {
+            serverError.value = 'К сожалению, эти даты только что забронировали. Выберите другие даты.';
+            isLoading.value = false;
+            return;
+        }
+
+        // Создание брони
+        await createBooking(startStr, endStr);
+
+        // Добавление данных о забронированных датах в файл ICS, который развернут на GitHub Gist
+        publishGistICS()
+
+        const message = createMessageForTelegram(startDate, endDate)
+
+        // Отправка уведомления в Telegram
+        sendTelegramNotification(message);
+        emit('success-submit', true);
+        onClose();
+
+    } catch (error) {
+        console.error('Ошибка в onFormSubmit:', error)
+        serverError.value = 'Произошла ошибка при бронировании. Попробуйте еще раз.';
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+onMounted(async () => {
+    if (props.isOpenDialog) {
+        // Сначала запускаем вебсокет на получение данных из firebase
+        // после того как получили данные, првоеряем есть ли ссылки на внешние календари
+        // если есть то выполняем запрос на получение этих календарей.
+        startRealtimeListener();
+        const icsUrls = props.house.icsUrls || null
+        if (icsUrls) {
+            syncExternalCalendars(
+                props.house.id,
+                props.house.title,
+                icsUrls,
+                props.house.pricing
+            ).catch(e => {
+                console.error('Ошибка фоновой синхронизации:', e)
+            })
+        }
+    }
+});
+
+onBeforeUnmount(() => {
+    stopRealtimeListener();
+    resetForm();
+});
+
+const getCheckoutHint = (date) => {
+    const currentDate = new Date(date.year, date.month, date.day);
+    currentDate.setHours(0, 0, 0, 0);
+    const currentTime = currentDate.getTime();
+
+    // Занята ли дата?
+    const isOccupied = allBookedDates.value.some(d => d.getTime() === currentTime);
+
+    // Заблокирована ли дата?
+    const isDisabled = disableDate.value.some(d => new Date(d).setHours(0, 0, 0, 0) === currentTime);
+
+    // Показываем тултип только если дата занята, но не заблокирована
+    return isOccupied && !isDisabled ? 'Только для выезда' : '';
+};
 </script>
 
 <style lang="scss">
@@ -421,8 +714,7 @@ onMounted(() => {
     @include spectral-regular;
     font-size: 18px;
     width: 50%;
-
-    &__container {}
+    max-width: 800px;
 
     &__form {
         display: grid;
@@ -469,11 +761,16 @@ onMounted(() => {
         color: $color-light-text !important;
     }
 
+    &__date-container {
+        grid-column: 1 / 3;
+    }
+
     &__date {
+        position: relative;
         height: 40px;
 
-        .p-datepicker-dropdown {
-            background: $color-bg-default !important;
+        .p-datepicker {
+            width: 100%;
         }
     }
 
@@ -484,132 +781,97 @@ onMounted(() => {
     &__date-booked {
         text-decoration: line-through;
     }
+}
 
-    &__input,
-    .p-datepicker-input,
-    .p-textarea {
-        background-color: transparent !important;
-        border: 1px solid $color-accent;
-        font-weight: 400 !important;
-        color: $color-base-text !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
-        width: 100%;
-    }
+@media (max-width: $vp-1024) {
+    .booking {
+        width: 70%;
 
-    &__input,
-    .p-datepicker-input {
-        height: 40px;
-    }
-
-    .p-inputtext:enabled:focus,
-    .p-textarea:enabled:focus {
-        border-color: $color-accent;
-    }
-
-    .my-checkbox {
-        cursor: pointer;
-
-        // Базовые стили для квадратика
-        .p-checkbox-box {
-            width: 20px;
-            height: 20px;
-            background: transparent !important;
-            border: 1px solid $color-accent !important;
-            border-radius: 4px !important;
-            transition: all 0.2s ease;
-            position: relative;
-
-            // &:hover {
-            //     border-color: darken($color-accent, 10%) !important;
-            // }
+        .p-dialog-title {
+            font-size: 24px;
         }
 
-        // Стили для отмеченного состояния
-        &.p-checkbox-checked {
-            .p-checkbox-box {
-                background: $color-accent !important;
-                border-color: $color-accent !important;
+        &__house-title {
+            font-size: 22px;
+        }
 
-                .p-checkbox-icon {
-                    color: $color-light-text !important;
-                    font-size: 14px;
-                }
-            }
+        &__form {
+            gap: 16px 24px;
         }
     }
 }
 
-.p-datepicker-panel {
-    background: $color-base-white !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
-    border: none !important;
+@media (max-width: $vp-768) {
+    .booking {
+        width: 95% !important;
+        margin: 16px;
 
-    .p-datepicker-header {
-        background: $color-accent !important;
-        border-bottom: none;
-        border-radius: 10px;
-        padding: 2px;
-
-        .p-datepicker-select-month,
-        .p-datepicker-select-year {
-            color: $color-light-text;
+        .p-dialog-content {
+            padding: 16px !important;
         }
-    }
 
-    .p-datepicker-weekdays,
-    .p-datepicker-month,
-    .p-datepicker-year {
-        color: $color-base-text !important;
-    }
-
-    .p-datepicker-calendar td span {
-        border-radius: 6px !important;
-
-        &.p-highlight {
-            background: $color-accent !important;
-            color: $color-light-text !important;
+        .p-dialog-title {
+            font-size: 20px;
         }
-    }
 
-    .p-datepicker-weekday,
-    .p-datepicker-day {
-        color: $color-base-text;
-    }
+        &__house-title {
+            font-size: 18px;
+            margin-bottom: 18px;
+        }
 
-    .p-datepicker-day:not(.p-datepicker-day-selected):not(.p-disabled):hover,
-    .p-datepicker-month:not(.p-disabled):not(.p-datepicker-month-selected):hover,
-    .p-datepicker-year:not(.p-disabled):not(.p-datepicker-year-selected):hover {
-        color: $color-base-text !important;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
+        &__form {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
 
-    .p-button-text.p-button-secondary:not(:disabled):hover {
-        background: transparent;
-        color: $color-base-white;
-    }
+        &__username,
+        &__phone,
+        &__people-amount-container,
+        &__agreement,
+        &__date-container,
+        &__wishes,
+        &__submit {
+            grid-column: 1;
+        }
 
-    .p-datepicker-today>.p-datepicker-day {
-        background-color: transparent;
-        border: 1px solid $color-accent;
-        color: $color-base-text;
-    }
+        &__input-label {
+            font-size: 14px;
+            display: block;
+            margin-bottom: 4px;
+        }
 
-    .p-datepicker-day-selected,
-    .p-datepicker-month-selected,
-    .p-datepicker-year-selected {
-        background-color: $color-accent !important;
-        color: $color-light-text !important;
-    }
+        &__agreement {
+            font-size: 12px;
+            display: grid;
+            grid-template-columns: min-content 1fr;
 
-    .p-datepicker-day:focus-visible {
-        outline-color: $color-accent !important;
-    }
+            .p-message {
+                grid-column: 1 / 3;
+            }
 
-    .p-datepicker-select-month:enabled:hover,
-    .p-datepicker-select-year:enabled:hover {
-        background: transparent;
+            .p-checkbox {
+                margin-right: 10px;
+            }
+
+            label {
+                font-size: 12px;
+            }
+        }
+
+        &__date {
+            .p-datepicker {
+                width: 100%;
+                min-width: auto;
+
+                table {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        &__date-price {
+            font-size: 10px;
+        }
     }
 }
 </style>
