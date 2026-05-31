@@ -30,10 +30,9 @@
                 </p>
                 <p class="house-details__gist-link">
                     <strong>Ссылка для синхронизации календарей с внешними ресурсами:</strong>
-                    {{ `https://gist.githubusercontent.com/IvanDolgikh/${house.gistId.id}/raw/215ee378d8aa05503c3157a4d61f551530709035/${house.gistId.filename}` }}
+                    {{ house.gistId ? `https://gist.githubusercontent.com/IvanDolgikh/${house.gistId.id}/raw/${house.gistId.filename}` : 'Отсутствует' }}
                 </p>
             </div>
-
             <div class="house-details__actions">
                 <SpeedDial
                     :model="items"

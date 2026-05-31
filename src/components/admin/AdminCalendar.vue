@@ -303,9 +303,6 @@ const filteredBookings = computed(() => {
     const start = format(new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1))
     const end = format(new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 0))
 
-    console.log('📅 Фильтр от', start, 'до', end)
-    console.log('📅 После фильтра:', result.length)
-
     result = result.filter(b => b.startDate <= end && b.endDate >= start)
 
     return result

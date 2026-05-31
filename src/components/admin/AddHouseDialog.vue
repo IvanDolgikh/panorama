@@ -131,7 +131,6 @@ const onRemoveGalleryPhoto = (index) => {
 
 watch(() => props.houseToEdit, (house) => {
     if (house) {
-        console.log('house.slug', house.slug)
         form.title = house.title || ''
         form.slug = house.slug || ''
         form.description = house.description || ''
@@ -151,7 +150,6 @@ watch(() => props.houseToEdit, (house) => {
         form.pricing = pricing
         form.icsUrls.avito = house.icsUrls?.avito || ''
         form.icsUrls.yandex = house.icsUrls?.yandex || ''
-        console.log('form.pricing', form.pricing)
 
         mainPhotoPreview.value = house.mainPhoto || null
         galleryPreviews.value = [...(house.gallery || [])]

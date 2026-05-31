@@ -186,6 +186,7 @@ import DatePicker from 'primevue/datepicker';
 import Textarea from 'primevue/textarea';
 
 import { sendTelegramNotification } from '@services/telegram';
+import { sendVkNotification } from '@services/vk';
 import { db } from '@services/firebase';
 import {
     query,
@@ -459,7 +460,7 @@ const loadBookedDatesOnce = async () => {
 
 // ПРОВЕРКА ДОСТУПНОСТИ ДАТ
 const checkDatesAvailability = async (startStr, endStr) => {
-    // console.log('Проверка доступности:', { startStr, endStr });
+    console.log('Проверка доступности:', { startStr, endStr });
 
     const q = query(
         collection(db, 'bookings'),
@@ -469,11 +470,11 @@ const checkDatesAvailability = async (startStr, endStr) => {
     );
 
     const snapshot = await getDocs(q);
-    // console.log('Пересекающиеся броней:', snapshot.size);
+    console.log('Пересекающиеся броней:', snapshot.size);
 
     snapshot.forEach((doc) => {
         const data = doc.data();
-        // console.log(`Пересечение с бронью: ${data.startDate} - ${data.endDate}`);
+        console.log(`Пересечение с бронью: ${data.startDate} - ${data.endDate}`);
     });
 
     return snapshot.empty;
@@ -586,7 +587,7 @@ const publishGistICS = async () => {
     publishICS(activeBookings, props.house.id, props.house.gistId)
 }
 
-const createMessageForTelegram = (startDate, endDate) => {
+const createMessageForChat = (startDate, endDate) => {
     const startStr = formatLocalDate(startDate);
     const endStr = formatLocalDate(endDate);
     const nightsCount = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
@@ -651,10 +652,13 @@ const onFormSubmit = async () => {
         // Добавление данных о забронированных датах в файл ICS, который развернут на GitHub Gist
         publishGistICS()
 
-        const message = createMessageForTelegram(startDate, endDate)
+        const message = createMessageForChat(startDate, endDate)
 
         // Отправка уведомления в Telegram
-        sendTelegramNotification(message);
+        // sendTelegramNotification(message);
+
+        sendVkNotification(message)
+
         emit('success-submit', true);
         onClose();
 
@@ -669,7 +673,7 @@ const onFormSubmit = async () => {
 onMounted(async () => {
     if (props.isOpenDialog) {
         // Сначала запускаем вебсокет на получение данных из firebase
-        // после того как получили данные, првоеряем есть ли ссылки на внешние календари
+        // после того как получили данные, Проверяем есть ли ссылки на внешние календари
         // если есть то выполняем запрос на получение этих календарей.
         startRealtimeListener();
         const icsUrls = props.house.icsUrls || null

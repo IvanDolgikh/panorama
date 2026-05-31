@@ -72,16 +72,16 @@ const importExternalBookings = async (events, source, houseId, houseTitle, house
             })
         }
     }
-    // console.log(`Импортировано из ${source}: ${events.length} броней`)
+    console.log(`Импортировано из ${source}: ${events.length} броней`)
 }
 
 export const syncExternalCalendars = async (houseId, houseTitle, icsUrls, housePricing) => {
     if (!icsUrls) {
-        // console.log('Нет ссылок ICS для этого дома')
+        console.log('Нет ссылок ICS для этого дома')
         return
     }
 
-    // console.log('Синхронизация с внешними площадками')
+    console.log('Синхронизация с внешними площадками')
 
     if (icsUrls.avito) {
         try {

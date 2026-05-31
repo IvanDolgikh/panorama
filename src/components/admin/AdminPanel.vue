@@ -117,7 +117,7 @@ const loadData = async () => {
             ...doc.data()
         }))
 
-        // console.log('Загружено:', houses.value.length, 'домов,', bookings.value.length, 'броней')
+        console.log('Загружено:', houses.value.length, 'домов,', bookings.value.length, 'броней')
     } catch (error) {
         console.error('Ошибка загрузки:', error)
     }
