@@ -71,7 +71,7 @@ import HousePricing from './HousePricing.vue'
 import HousePhotos from './HousePhotos.vue'
 
 import { compressImage, base64ToBlob } from '@services/imageCompressor'
-import { uploadToImgBB } from '@services/imgbb'
+import { uploadToStorage, deleteFromStorage } from '@services/storage'
 import { createGist } from '@services/calendarSync'
 
 const toast = useToast()
@@ -195,7 +195,63 @@ const formatLocalDate = (date) => {
     return `${year}-${month}-${day}`;
 };
 
-// ✅ Загрузка происходит ТОЛЬКО при сохранении
+
+// Удаление старых фото из Storage
+const cleanupOldPhotos = async () => {
+    if (!props.houseToEdit) return
+
+    const oldPhotos = [
+        props.houseToEdit.mainPhoto,
+        ...(props.houseToEdit.gallery || [])
+    ].filter(Boolean)
+
+    const newPhotos = [
+        mainPhotoPreview.value,
+        ...galleryPreviews.value
+    ].filter(p => p && !p.startsWith('data:'))
+
+    for (const oldUrl of oldPhotos) {
+        if (!newPhotos.includes(oldUrl)) {
+            await deleteFromStorage(oldUrl)
+        }
+    }
+}
+
+// Загрузка главного фото
+const uploadMainPhoto = async () => {
+    if (mainPhotoPreview.value?.startsWith('data:')) {
+        const blob = base64ToBlob(mainPhotoPreview.value)
+        return await uploadToStorage(blob, form.slug)
+    }
+    return props.houseToEdit?.mainPhoto || null
+}
+
+// Загрузка галереи
+const uploadGallery = async () => {
+    const urls = []
+
+    // Оставляем старые фото
+    if (props.houseToEdit?.gallery) {
+        for (const oldUrl of props.houseToEdit.gallery) {
+            if (galleryPreviews.value.includes(oldUrl)) {
+                urls.push(oldUrl)
+            }
+        }
+    }
+
+    // Добавляем новые фото
+    for (const preview of galleryPreviews.value) {
+        if (preview.startsWith('data:')) {
+            const blob = base64ToBlob(preview)
+            const url = await uploadToStorage(blob, form.slug)
+            urls.push(url)
+        }
+    }
+
+    return urls
+}
+
+// Сохранение
 const saveHouse = async () => {
     if (!form.title || !form.slug) {
         alert('Заполните обязательные поля')
@@ -205,22 +261,10 @@ const saveHouse = async () => {
     try {
         isSaving.value = true
 
-        let mainPhotoUrl = props.houseToEdit?.mainPhoto || null
+        await cleanupOldPhotos()
 
-        if (mainPhotoPreview.value && mainPhotoPreview.value.startsWith('data:')) {
-            const blob = base64ToBlob(mainPhotoPreview.value)
-            mainPhotoUrl = await uploadToImgBB(blob)
-        }
-
-        const galleryUrls = [...(props.houseToEdit?.gallery || [])]
-
-        for (const preview of galleryPreviews.value) {
-            if (preview.startsWith('data:')) {
-                const blob = base64ToBlob(preview)
-                const url = await uploadToImgBB(blob)
-                galleryUrls.push(url)
-            }
-        }
+        const mainPhotoUrl = await uploadMainPhoto()
+        const galleryUrls = await uploadGallery()
 
         const pricing = {
             base: form.pricing.base,
@@ -250,7 +294,6 @@ const saveHouse = async () => {
         }
 
         if (props.houseToEdit) {
-            // Если gistId ещё нет — создаём
             if (!props.houseToEdit.gistId) {
                 const gistId = await createGist(form.title, form.slug)
                 houseData.gistId = gistId
@@ -268,7 +311,6 @@ const saveHouse = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Дом создан',
-                detail: `ICS: https://gist.githubusercontent.com/raw/${gistId}/bookings.ics`,
                 life: 15000
             })
         }
@@ -276,16 +318,12 @@ const saveHouse = async () => {
         onClose()
 
     } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'Ошибка',
-            detail: 'Не удалось сохранить дом',
-            life: 5000
-        })
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить дом', life: 5000 })
     } finally {
         isSaving.value = false
     }
 }
+
 const onClose = () => {
     emit('close-dialog')
     resetForm()

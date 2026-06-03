@@ -3,13 +3,16 @@
         <div class="promo__container">
             <div class="promo__title-container">
                 <h2 class="promo__title">Станьте частью нашей панорамы</h2>
-                <button class="promo__button">Забронировать</button>
+                <RouterLink
+                    to="/#houses"
+                    class="promo__button"
+                >Забронировать</RouterLink>
             </div>
             <div
                 class="promo__scroll-hint"
                 @click="scrollDown"
             >
-                <PhCaretDown :size="24" />
+                <PhCaretDown />
             </div>
         </div>
     </section>
@@ -90,6 +93,11 @@ const scrollDown = () => {
         animation: bounce 2s infinite;
         opacity: 0.7;
 
+        svg {
+            width: 54px;
+            height: 54px;
+        }
+
         &:hover {
             opacity: 1;
         }
@@ -115,7 +123,6 @@ const scrollDown = () => {
     }
 }
 
-// Планшеты (до 1024px)
 @media (max-width: $vp-1024) {
     .promo {
         &__container {
@@ -136,7 +143,6 @@ const scrollDown = () => {
     }
 }
 
-// Мобильные устройства (до 768px)
 @media (max-width: $vp-768) {
     .promo {
         background-position: center;
@@ -162,8 +168,8 @@ const scrollDown = () => {
             bottom: 20px;
 
             svg {
-                width: 50px;
-                height: 50px;
+                width: 24px;
+                height: 24px;
             }
         }
     }

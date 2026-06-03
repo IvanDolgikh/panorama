@@ -73,7 +73,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore'
+import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore'
 import { db } from '@services/firebase'
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from 'primevue/usetoast';
@@ -101,23 +101,8 @@ const houseToEdit = ref(null)
 
 const loadData = async () => {
     try {
-        const [housesSnapshot, bookingsSnapshot] = await Promise.all([
-            getDocs(collection(db, 'houses')),
-            getDocs(collection(db, 'bookings'))
-        ])
-
-        houses.value = housesSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }))
-
-
-        bookings.value = bookingsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }))
-
-        console.log('Загружено:', houses.value.length, 'домов,', bookings.value.length, 'броней')
+        const housesSnapshot = await getDocs(collection(db, 'houses'))
+        houses.value = housesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     } catch (error) {
         console.error('Ошибка загрузки:', error)
     }

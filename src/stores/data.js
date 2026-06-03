@@ -20,7 +20,6 @@ export const useDataStore = defineStore('data', () => {
             const snapshot = await getDocs(collection(db, 'houses'))
             houses.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             housesLoaded.value = true
-            console.log('Дома загружены:', houses.value.length)
         } catch (error) {
             console.error('Ошибка загрузки домов:', error)
         } finally {
@@ -41,7 +40,6 @@ export const useDataStore = defineStore('data', () => {
             const snapshot = await getDocs(collection(db, 'bookings'))
             bookings.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             bookingsLoaded.value = true
-            console.log('Брони загружены:', bookings.value.length)
         } catch (error) {
             console.error('Ошибка загрузки броней:', error)
         } finally {

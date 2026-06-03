@@ -184,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
 import Select from 'primevue/select'
@@ -193,7 +193,7 @@ import Column from 'primevue/column'
 
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
-import { deleteDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@services/firebase'
 
 import { publishICS } from '@services/calendarSync'
@@ -205,12 +205,12 @@ const emit = defineEmits(['booking-deleted'])
 
 const props = defineProps({
     houses: { type: Array, default: () => [] },
-    bookings: { type: Array, default: () => [] }
 })
 
 const viewMode = ref('calendar')
 const selectedHouse = ref(null)
 const currentDate = ref(new Date())
+const monthBookingsData = ref([])
 
 const viewOptions = [
     { label: 'Календарь', value: 'calendar' },
@@ -234,6 +234,21 @@ const sourceOptions = [
 const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 const colors = ['#5c623f', '#e74c3c', '#2ecc71', '#f39c12']
 const getColor = (id) => colors[props.houses.findIndex(h => h.id === id) % colors.length]
+
+const loadMonthBookings = async () => {
+    const year = currentDate.value.getFullYear()
+    const month = currentDate.value.getMonth()
+    const start = new Date(year, month, 1).toISOString().split('T')[0]
+    const end = new Date(year, month + 1, 0).toISOString().split('T')[0]
+
+    const snapshot = await getDocs(query(
+        collection(db, 'bookings'),
+        where('startDate', '<=', end),
+        where('endDate', '>=', start)
+    ))
+
+    monthBookingsData.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}
 
 const monthLabel = computed(() =>
     currentDate.value.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })
@@ -268,7 +283,7 @@ const calendarDays = computed(() => {
 
 const makeDay = (date, isCurrentMonth, today) => {
     const dateStr = format(date)
-    const dayBookings = filteredBookings.value.filter(b =>
+    const dayBookings = monthBookingsData.value.filter(b =>
         b.startDate <= dateStr && b.endDate > dateStr
     )
     // Сортировка по порядку домов в массиве houses
@@ -288,7 +303,7 @@ const makeDay = (date, isCurrentMonth, today) => {
 
 // Таблица
 const filteredBookings = computed(() => {
-    let result = props.bookings
+    let result = monthBookingsData.value
 
     if (selectedHouse.value) {
         result = result.filter(b => b.houseId === selectedHouse.value)
@@ -324,19 +339,14 @@ const confirmDelete = (booking) => {
         accept: async () => {
             try {
                 const isMyBooking = !booking.source
-
                 await deleteDoc(doc(db, 'bookings', booking.id))
 
-                // Удаляем из локального массива
-                const updatedBookings = props.bookings.filter(b => b.id !== booking.id)
-
-                // Обновляем ICS из локального массива, без запроса к Firestore
                 if (isMyBooking) {
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
                     const todayStr = today.toISOString().split('T')[0]
+                    const updatedBookings = monthBookingsData.value.filter(b => b.id !== booking.id)
                     const activeBookings = updatedBookings.filter(b => !b.source && b.endDate >= todayStr)
-
                     const house = props.houses.find(h => h.id === booking.houseId)
                     if (house?.gistId) {
                         await publishICS(activeBookings, house.id, house.gistId)
@@ -344,6 +354,7 @@ const confirmDelete = (booking) => {
                 }
 
                 emit('booking-deleted', booking.id)
+                monthBookingsData.value = monthBookingsData.value.filter(b => b.id !== booking.id)
                 toast.add({ severity: 'success', summary: 'Удалено', detail: 'Бронь удалена', life: 3000 })
             } catch (error) {
                 toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить', life: 3000 })
@@ -351,6 +362,14 @@ const confirmDelete = (booking) => {
         }
     })
 }
+
+watch(currentDate, async () => {
+    await loadMonthBookings()
+}, { deep: true })
+
+onMounted(async () => {
+    await loadMonthBookings()
+})
 </script>
 
 <style

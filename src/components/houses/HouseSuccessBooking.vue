@@ -14,7 +14,7 @@
                 <span class="pi pi-verified"></span>
             </div>
             <p class="succes-booking__text-1">Спасибо!</p>
-            <p class="succes-booking__text-2">Ваша бронь зарегистрирована. В ближайщее время с вами свяжутся для подтверждения брони</p>
+            <p class="succes-booking__text-2">Ваша бронь зарегистрирована. Будем ждать вас в гости!</p>
             <Button
                 class="succes-booking__submit"
                 type="button"

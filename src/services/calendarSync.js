@@ -72,16 +72,13 @@ const importExternalBookings = async (events, source, houseId, houseTitle, house
             })
         }
     }
-    console.log(`Импортировано из ${source}: ${events.length} броней`)
 }
 
 export const syncExternalCalendars = async (houseId, houseTitle, icsUrls, housePricing) => {
     if (!icsUrls) {
-        console.log('Нет ссылок ICS для этого дома')
         return
     }
 
-    console.log('Синхронизация с внешними площадками')
 
     if (icsUrls.avito) {
         try {
@@ -104,8 +101,6 @@ export const syncExternalCalendars = async (houseId, houseTitle, icsUrls, houseP
             console.error('Ошибка синхронизации с Яндексом:', e)
         }
     }
-
-    console.log('✅ Синхронизация завершена')
 }
 
 // Публикация ICS на GitHub Gist (постоянный URL)

@@ -73,13 +73,6 @@ const error = ref('')
 const isLoading = ref(false)
 const loading = ref(false)
 
-onMounted(() => {
-    onAuthStateChanged(auth, (firebaseUser) => {
-        user.value = firebaseUser
-        isLoading.value = false
-    })
-})
-
 const login = async () => {
     try {
         loading.value = true
@@ -92,9 +85,17 @@ const login = async () => {
     }
 }
 
-const logout = async () => {
-    await signOut(auth)
-}
+onMounted(() => {
+    onAuthStateChanged(auth, (firebaseUser) => {
+        user.value = firebaseUser
+        isLoading.value = false
+    })
+})
+
+
+// const logout = async () => {
+//     await signOut(auth)
+// }
 </script>
 
 <style lang="scss">

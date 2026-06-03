@@ -27,7 +27,7 @@
 
             <!-- Загрузка -->
             <div
-                v-if="!houses.length && !bookings.length"
+                v-if="!houses.length && !monthBookingsData.length"
                 class="admin-stats__loading"
             >
                 <p>Нет данных для отображения</p>
@@ -97,21 +97,25 @@
 </template>
 
 <script setup>
-import { ref, computed, toRefs } from 'vue'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { db } from '@services/firebase'
+import { ref, computed, toRefs, watch, onMounted } from 'vue'
 import Button from 'primevue/button'
 
 const props = defineProps({
     houses: { type: Array, default: () => [] },
-    bookings: { type: Array, default: () => [] }
 })
 
-const { houses, bookings } = toRefs(props)
+const { houses } = toRefs(props)
 
-// Месяц по умолчанию — текущий
+const monthBookingsData = ref([])
+const yearRevenue = ref(0)
+
+// Месяц по умолчанию - текущий
 const selectedMonth = ref(new Date().getMonth())
 const selectedYear = ref(new Date().getFullYear())
 
-// Текущий месяц?
+// Текущий месяц
 const isCurrentMonth = computed(() => {
     const now = new Date()
     return selectedMonth.value === now.getMonth() && selectedYear.value === now.getFullYear()
@@ -148,8 +152,37 @@ const resetTime = (date) => {
     return d
 }
 
+
+const loadYearRevenue = async () => {
+    const year = selectedYear.value
+    const snapshot = await getDocs(query(
+        collection(db, 'bookings'),
+        where('startDate', '<=', `${year}-12-31`),
+        where('endDate', '>=', `${year}-01-01`)
+    ))
+
+    const yearBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    yearRevenue.value = yearBookings
+        .filter(b => b.startDate >= `${year}-01-01` && b.startDate <= `${year}-12-31`)
+        .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+}
+
+const loadMonthBookings = async () => {
+    const start = new Date(selectedYear.value, selectedMonth.value, 1).toISOString().split('T')[0]
+    const end = new Date(selectedYear.value, selectedMonth.value + 1, 0).toISOString().split('T')[0]
+
+    const snapshot = await getDocs(query(
+        collection(db, 'bookings'),
+        where('startDate', '<=', end),
+        where('endDate', '>=', start)
+    ))
+
+    monthBookingsData.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}
+
 // Вся статистика
 const stats = computed(() => {
+    const monthBookings = monthBookingsData.value
 
     const monthStart = resetTime(new Date(selectedYear.value, selectedMonth.value, 1))
     const monthEnd = resetTime(new Date(selectedYear.value, selectedMonth.value + 1, 0))
@@ -157,34 +190,12 @@ const stats = computed(() => {
     const monthEndStr = formatDate(monthEnd)
     const daysInMonth = monthEnd.getDate()
 
-    // Брони, пересекающиеся с выбранным месяцем
-    const monthBookings = bookings.value.filter(b => {
-        return b.startDate <= monthEndStr && b.endDate >= monthStartStr
-    })
-
-    // Выручка за месяц
     const monthRevenue = monthBookings
         .filter(b => b.startDate >= monthStartStr && b.startDate <= monthEndStr)
         .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
 
-    // Выручка за год
-    const yearStart = resetTime(new Date(selectedYear.value, 0, 1))
-    const yearEnd = resetTime(new Date(selectedYear.value, 11, 31))
-    const yearStartStr = formatDate(yearStart)
-    const yearEndStr = formatDate(yearEnd)
-
-    const yearBookings = bookings.value.filter(b => {
-        return b.startDate <= yearEndStr && b.endDate >= yearStartStr
-    })
-
-    const yearRevenue = yearBookings
-        .filter(b => b.startDate >= yearStartStr && b.startDate <= yearEndStr)
-        .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
-
-    // Статистика по домам
     const housesStats = houses.value.map(house => {
         const houseBookings = monthBookings.filter(b => b.houseId === house.id)
-
         const totalNights = houseBookings.reduce((sum, b) => sum + (b.nights || 0), 0)
         const totalRevenuePerHouse = houseBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
         const occupancy = Math.round((totalNights / daysInMonth) * 100)
@@ -193,7 +204,7 @@ const stats = computed(() => {
             title: house.title,
             bookings: houseBookings.length,
             nights: totalNights,
-            occupancy: occupancy,
+            occupancy,
             revenue: totalRevenuePerHouse
         }
     }).sort((a, b) => b.revenue - a.revenue)
@@ -201,7 +212,7 @@ const stats = computed(() => {
     return {
         totalBookings: monthBookings.length,
         monthRevenue,
-        yearRevenue,
+        yearRevenue: yearRevenue.value,
         houses: housesStats
     }
 })
@@ -213,6 +224,15 @@ const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
 }
+
+watch([selectedMonth, selectedYear], () => {
+    loadMonthBookings()
+})
+
+onMounted(async () => {
+    await loadMonthBookings()
+    await loadYearRevenue()
+})
 </script>
 
 <style

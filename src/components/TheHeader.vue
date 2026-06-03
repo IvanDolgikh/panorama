@@ -136,7 +136,7 @@ defineExpose({ headerHeight })
         border: none;
         cursor: pointer;
         padding: 0;
-        z-index: 101; // Чтобы бургер был поверх меню
+        z-index: 101;
 
         span {
             display: block;

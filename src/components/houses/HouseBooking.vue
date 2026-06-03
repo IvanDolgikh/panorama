@@ -311,7 +311,7 @@ const processBookedDates = (snapshot) => {
         const start = new Date(Math.max(startTime, todayTime));
         const currentDate = new Date(start);
 
-        // Блокируем только дни проживания (день выезда НЕ блокируем)
+        // Блокируем только дни проживания (день выезда не блокируем)
         const lastBookedDate = new Date(endDate);
         lastBookedDate.setDate(lastBookedDate.getDate() - 1);
 
@@ -364,7 +364,7 @@ const updateDisabledDates = () => {
                 return;
             }
 
-            // Если это не первый занятый день после заезда — блокируем
+            // Если это не первый занятый день после заезда - блокируем
             // Первый занятый день после заезда = потенциальный день выезда (не блокируем)
             if (bookedAfterStart.length > 0 && bookedTime !== bookedAfterStart[0].getTime()) {
                 disabled.push(bookedDate);
@@ -460,7 +460,6 @@ const loadBookedDatesOnce = async () => {
 
 // ПРОВЕРКА ДОСТУПНОСТИ ДАТ
 const checkDatesAvailability = async (startStr, endStr) => {
-    console.log('Проверка доступности:', { startStr, endStr });
 
     const q = query(
         collection(db, 'bookings'),
@@ -470,11 +469,9 @@ const checkDatesAvailability = async (startStr, endStr) => {
     );
 
     const snapshot = await getDocs(q);
-    console.log('Пересекающиеся броней:', snapshot.size);
 
     snapshot.forEach((doc) => {
         const data = doc.data();
-        console.log(`Пересечение с бронью: ${data.startDate} - ${data.endDate}`);
     });
 
     return snapshot.empty;

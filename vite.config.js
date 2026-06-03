@@ -27,4 +27,13 @@ export default defineConfig({
             }
         }
     },
+    server: {
+        proxy: {
+            '/vk-api': {
+                target: 'https://api.vk.com',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/vk-api/, '')
+            }
+        }
+    }
 })

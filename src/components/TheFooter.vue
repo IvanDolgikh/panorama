@@ -5,7 +5,8 @@
 
             <div class="main-footer__documents">
                 <a
-                    :href="pdfUrl"
+                    href="#"
+                    @click.prevent
                     target="_blank"
                     rel="noopener noreferrer"
                 >Публичная оферта</a>

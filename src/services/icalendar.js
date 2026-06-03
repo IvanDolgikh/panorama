@@ -66,7 +66,7 @@ export const fetchExternalBookings = async (url) => {
             const text = await response.text()
             return parseExternalICS(text)
         } catch (error) {
-            continue // Пробуем следующий прокси
+            continue
         }
     }
     return []
